@@ -48,10 +48,10 @@
     <textarea class="w-full p-3 border rounded resize-y text-black" id="input" placeholder="Letra de la canción." rows="6"></textarea>
 
     <div class="flex gap-2 mt-2 flex-wrap">
-      <button class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg" onclick="analizar()">Analizar</button>
-      <button class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg" onclick="copiarTexto()">📋 Copiar</button>
-      <button class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg" onclick="exportarTexto()">📄 TXT</button>
-      <button class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg" onclick="exportarPDF()">📑 PDF</button>
+      <button class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg" onclick="window.analizar()">Analizar</button>
+      <button class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg" onclick="window.copiarTexto()">📋 Copiar</button>
+      <button class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg" onclick="window.exportarTexto()">📄 TXT</button>
+      <button class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg" onclick="window.exportarPDF()">📑 PDF</button>
     </div>
 
     <p class="hidden" id="loading">⏳ Analizando...</p>
@@ -77,10 +77,7 @@
 
 <script>
 function limpiarFormato(texto) {
-  return texto
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/---+/g, '')
-    .trim();
+  return texto.replace(/\*\*(.*?)\*\*/g, '$1').replace(/---+/g, '').trim();
 }
 function exportarTexto() {
   const contenido = document.getElementById('interpretacion-exportada').innerText;
@@ -124,28 +121,14 @@ function analizar() {
   outputEl.innerHTML = "";
   loading.classList.remove('hidden');
 
- fetch("/lyric", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ letra: texto })
-})
-,
-    body: JSON.stringify({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      messages: [
-        {
-          role: "user",
-          content: `Actuá como un analista lírico y crítico musical profesional. Cuando recibas una letra de canción, realizá un análisis completo, claro y estructurado. Usá etiquetas HTML como <strong> en lugar de Markdown. Quitá los separadores '---'.
-
-Letra:
-${texto}`
-        }
-      ]
-    })
+  fetch("/lyric", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ letra: texto })
   })
   .then(res => res.json())
   .then(data => {
-    const respuesta = data.choices?.[0]?.message?.content || "Sin respuesta.";
+    const respuesta = data.respuesta || "Sin respuesta.";
     outputEl.innerHTML = limpiarFormato(respuesta);
   })
   .catch(err => {
@@ -155,13 +138,13 @@ ${texto}`
     loading.classList.add('hidden');
   });
 }
+
+// Asegurar visibilidad global
 window.analizar = analizar;
-window.exportarPDF = exportarPDF;
 window.exportarTexto = exportarTexto;
+window.exportarPDF = exportarPDF;
 window.copiarTexto = copiarTexto;
 window.toggleModo = toggleModo;
-
-  
 </script>
 
 </body>
