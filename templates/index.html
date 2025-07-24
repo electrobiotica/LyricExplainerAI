@@ -36,25 +36,36 @@
     }
   </style>
 </head>
-<body class="min-h-screen light flex items-center justify-center px-4" id="body">
+<body class="min-h-screen overflow-hiddenlight flex items-center justify-center px-4" id="body">
   <div class="bg-white max-w-2xl w-full rounded-xl shadow-lg p-6 space-y-4 text-sm" id="contenedor">
-    <div class="w-full flex justify-end mb-2">
-      <button class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg ml-auto" onclick="toggleModo()">🌗</button>
+    <div class="w-full flex justify-between mb-2">
+      <select id="langSelect" class="text-sm border px-2 py-1 rounded" onchange="cambiarIdioma(this.value)">
+        <option value="es">🇪🇸 Español</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="pt">🇧🇷 Português</option>
+        <option value="fr">🇫🇷 Français</option>
+      </select>
+      <button class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg" onclick="toggleModo()">🌗</button>
     </div>
-    <h1 class="text-2xl font-bold text-pink-600 dark:text-pink-300">🎵 Lyric Explainer</h1>
-    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+
+    <h1 class="text-2xl font-bold text-pink-600 dark:text-pink-300" data-trad="titulo">🎵 Lyric Explainer</h1>
+    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1" data-trad="descripcion">
       Una app para analizar letras de canciones con inteligencia artificial. Obtené análisis literarios, poéticos y culturales en segundos.
     </p>
-    <textarea class="w-full p-3 border rounded resize-y text-black" id="input" placeholder="Letra de la canción." rows="6"></textarea>
+    <textarea class="w-full p-3 border rounded resize-none text-black" id="input" data-placeholder="placeholder_input" rows="6"></textarea>
 
-    <div class="flex gap-2 mt-2 flex-wrap">
-      <button class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg" onclick="window.analizar()">Analizar</button>
-      <button class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg" onclick="window.copiarTexto()">📋 Copiar</button>
-      <button class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg" onclick="window.exportarTexto()">📄 TXT</button>
-      <button class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg" onclick="window.exportarPDF()">📑 PDF</button>
+
+    <div class="mt-4">
+      <button class="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg" onclick="window.analizar()" data-trad="btn_analizar">Analizar</button>
     </div>
 
-    <p class="hidden" id="loading">⏳ Analizando...</p>
+    <div class="flex gap-2 mt-3 flex-wrap justify-center">
+      <button class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg" onclick="window.copiarTexto()" data-trad="btn_copiar">📋 Copiar</button>
+      <button class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg" onclick="window.exportarTexto()" data-trad="btn_txt">📄 TXT</button>
+      <button class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg" onclick="window.exportarPDF()" data-trad="btn_pdf">📑 PDF</button>
+    </div>
+
+    <p class="hidden" id="loading" data-trad="cargando">⏳ Analizando...</p>
 
     <div class="whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 border rounded-lg p-4 min-h-[100px] text-black dark:text-white" data-label="contenedor" id="respuesta">
       <div id="interpretacion-exportada"></div>
@@ -62,8 +73,12 @@
 
     <footer class="text-xs mt-6 text-gray-600 dark:text-gray-400 text-center mt-6">
       <hr class="my-2"/>
-      <p><a href="/terminos.html" target="_blank">📜 Términos y Condiciones</a> • <a href="/privacidad.html" target="_blank">🔒 Política de Privacidad</a></p>
-      <p class="text-sm mt-2">Podés apoyar este proyecto:</p>
+      <p data-trad="footer_legal">
+  <a href="/terminos.html" target="_blank">📜 Términos y Condiciones</a> • 
+  <a href="/privacidad.html" target="_blank">🔒 Política de Privacidad</a>
+</p>
+<p class="text-sm mt-2" data-trad="footer_apoyo">Podés apoyar este proyecto:</p>
+
       <div class="flex justify-center gap-4 mt-2">
         <a href="https://cafecito.app/marianobiotico" target="_blank" rel="noopener">
           <img class="h-10" src="https://cdn.cafecito.app/imgs/buttons/button_1.png" alt="Invitame un café en cafecito.app">
@@ -138,13 +153,25 @@ function analizar() {
     loading.classList.add('hidden');
   });
 }
-
-// Asegurar visibilidad global
+async function cambiarIdioma(idioma) {
+  try {
+    const res = await fetch(`lang/${idioma}.json`);
+    const diccionario = await res.json();
+    document.documentElement.lang = idioma;
+    document.querySelectorAll("[data-trad]").forEach(el => {
+      const clave = el.getAttribute("data-trad");
+      if (diccionario[clave]) el.innerText = diccionario[clave];
+    });
+  } catch (error) {
+    console.error("Error al cargar traducción:", error);
+  }
+}
 window.analizar = analizar;
 window.exportarTexto = exportarTexto;
 window.exportarPDF = exportarPDF;
 window.copiarTexto = copiarTexto;
 window.toggleModo = toggleModo;
+window.cambiarIdioma = cambiarIdioma;
 </script>
 
 </body>

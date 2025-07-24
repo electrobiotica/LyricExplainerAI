@@ -1,0 +1,9 @@
+{
+  "titulo": "🎵 Lyric Explainer",
+  "descripcion": "An app to analyze song lyrics with AI. Get literary, poetic, and cultural insights in seconds.",
+  "btn_analizar": "Analyze",
+  "btn_copiar": "📋 Copy",
+  "btn_txt": "📄 TXT",
+  "btn_pdf": "📑 PDF",
+  "cargando": "⏳ Analyzing..."
+}

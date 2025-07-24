@@ -1,0 +1,9 @@
+{
+  "titulo": "🎵 Lyric Explainer",
+  "descripcion": "Una app para analizar letras de canciones con inteligencia artificial...",
+  "btn_analizar": "Analizar",
+  "btn_copiar": "📋 Copiar",
+  "btn_txt": "📄 TXT",
+  "btn_pdf": "📑 PDF",
+  "cargando": "⏳ Analizando..."
+}
