@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎵 Lyric Explainer</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body.light { background: #ffffff; color: #000000; }
+    body.dark  { background: #121212; color: #ffffff; }
+    .dark .bg-white { background-color: #1f1f1f !important; }
+    .dark .text-black { color: #ffffff !important; }
+    .dark select, .dark textarea { background: #333333; color: #ffffff; }
+    .dark #respuesta { background-color: #222 !important; color: #fff !important; }
+    .hidden { display: none; }
+    .pdf-header {
+      font-size: 20px;
+      font-weight: bold;
+      color: #e11d48;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .pdf-footer {
+      font-size: 12px;
+      text-align: center;
+      margin-top: 40px;
+      color: #666;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+    .pdf-content {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body class="min-h-screen light flex items-center justify-center px-4" id="body">
+  <div class="bg-white max-w-2xl w-full rounded-xl shadow-lg p-6 space-y-4 text-sm" id="contenedor">
+    <div class="w-full flex justify-end mb-2">
+      <button class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg ml-auto" onclick="toggleModo()">🌗</button>
+    </div>
+    <h1 class="text-2xl font-bold text-pink-600 dark:text-pink-300">🎵 Lyric Explainer</h1>
+    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+      Una app para analizar letras de canciones con inteligencia artificial. Obtené análisis literarios, poéticos y culturales en segundos.
+    </p>
+    <textarea class="w-full p-3 border rounded resize-y text-black" id="input" placeholder="Letra de la canción." rows="6"></textarea>
+
+    <div class="flex gap-2 mt-2 flex-wrap">
+      <button class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg" onclick="analizar()">Analizar</button>
+      <button class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg" onclick="copiarTexto()">📋 Copiar</button>
+      <button class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg" onclick="exportarTexto()">📄 TXT</button>
+      <button class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg" onclick="exportarPDF()">📑 PDF</button>
+    </div>
+
+    <p class="hidden" id="loading">⏳ Analizando...</p>
+
+    <div class="whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 border rounded-lg p-4 min-h-[100px] text-black dark:text-white" data-label="contenedor" id="respuesta">
+      <div id="interpretacion-exportada"></div>
+    </div>
+
+    <footer class="text-xs mt-6 text-gray-600 dark:text-gray-400 text-center mt-6">
+      <hr class="my-2"/>
+      <p><a href="/terminos.html" target="_blank">📜 Términos y Condiciones</a> • <a href="/privacidad.html" target="_blank">🔒 Política de Privacidad</a></p>
+      <p class="text-sm mt-2">Podés apoyar este proyecto:</p>
+      <div class="flex justify-center gap-4 mt-2">
+        <a href="https://cafecito.app/marianobiotico" target="_blank" rel="noopener">
+          <img class="h-10" src="https://cdn.cafecito.app/imgs/buttons/button_1.png" alt="Invitame un café en cafecito.app">
+        </a>
+        <a href="https://www.buymeacoffee.com/marianobiotico" target="_blank">
+          <img class="h-10" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee">
+        </a>
+      </div>
+    </footer>
+  </div>
+
+<script>
+function limpiarFormato(texto) {
+  return texto
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/---+/g, '')
+    .trim();
+}
+function exportarTexto() {
+  const contenido = document.getElementById('interpretacion-exportada').innerText;
+  const limpio = limpiarFormato(contenido);
+  const blob = new Blob(["🎵 Análisis generado por Lyric Explainer\n\n" + limpio], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'analisis_letra.txt';
+  link.click();
+}
+function exportarPDF() {
+  const contenido = document.getElementById('interpretacion-exportada');
+  const contenedor = document.createElement('div');
+  contenedor.innerHTML = `
+    <div class="pdf-header">🎵 Análisis generado por Lyric Explainer</div>
+    <div class="pdf-content">${contenido.innerHTML}</div>
+    <div class="pdf-footer">https://lyricexplainer.web.app</div>
+  `;
+  html2pdf().set({
+    margin: 15,
+    filename: 'analisis_letra.pdf',
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(contenedor).save();
+}
+function copiarTexto() {
+  const contenido = document.getElementById('interpretacion-exportada').innerText;
+  navigator.clipboard.writeText(contenido).then(() => alert("Texto copiado"));
+}
+function toggleModo() {
+  const body = document.getElementById('body');
+  body.classList.toggle('light');
+  body.classList.toggle('dark');
+}
+function analizar() {
+  const inputEl = document.getElementById('input');
+  const outputEl = document.getElementById('interpretacion-exportada');
+  const loading = document.getElementById('loading');
+  const texto = inputEl.value.trim();
+  if (!texto) return alert("Por favor ingresá una letra.");
+  outputEl.innerHTML = "";
+  loading.classList.remove('hidden');
+
+ fetch("/lyric", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ letra: texto })
+})
+,
+    body: JSON.stringify({
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      messages: [
+        {
+          role: "user",
+          content: `Actuá como un analista lírico y crítico musical profesional. Cuando recibas una letra de canción, realizá un análisis completo, claro y estructurado. Usá etiquetas HTML como <strong> en lugar de Markdown. Quitá los separadores '---'.
+
+Letra:
+${texto}`
+        }
+      ]
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const respuesta = data.choices?.[0]?.message?.content || "Sin respuesta.";
+    outputEl.innerHTML = limpiarFormato(respuesta);
+  })
+  .catch(err => {
+    outputEl.innerHTML = "❌ Error inesperado: " + err.message;
+  })
+  .finally(() => {
+    loading.classList.add('hidden');
+  });
+}
+</script>
+
+</body>
+</html>
